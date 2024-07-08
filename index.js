@@ -80,7 +80,7 @@ async function addParoquia(data, collectionName) {
 
 async function main() {
     console.log('excluindo')
- //   await limparParoquias()
+    await limparParoquias()
     console.log('banco limpo')
     await getPagina(pagina).then(function (data) { this.html = data; });
     while (existePagina) {
@@ -103,17 +103,18 @@ async function main() {
             p.vigario = p.padres[1] != undefined ? p.padres[1] : '';
 
             p.latitude = p.capelas[0].latitude != undefined ? p.capelas[0].latitude.replace("'", "").replace("'", "") : '';
-            p.longitude = p.capelas[0].latitude != undefined ? p.capelas[0].latitude.replace("'", "").replace("'", "") : '';
+            p.longitude = p.capelas[0].longitude != undefined ? p.capelas[0].longitude.replace("'", "").replace("'", "") : '';
 
             //p.telefones = 
             paroquias.push(p);
-            if (currentId == 142) {
+            if (currentId == 141) {
                 console.log('pausa aqui');
                 console.log(p)
             }
             existeItem = this.html.indexOf('"recuperaDetalhes(') != -1
             // console.log(p)
-            //      await addParoquia(p, collectionName)
+            if (currentId == 141)
+                await addParoquia(p, collectionName)
             p = {}
         }
 
@@ -132,11 +133,16 @@ function limparHtml() {
 
 function getCurrentId() {
     const html = this.html.substring(this.html.indexOf('"recuperaDetalhes('));
-    return parseInt(html.substring(0, html.indexOf("')") + 1).split(',')[1].replace("'", ""));
+    const id = parseInt(html.substring(0, html.indexOf("')") + 1).split(',')[1].replace("'", ""));
+    if (id == 141) {
+        console.log('=====>', id, html, this.html)
+    }
+    return id;
 }
 
 function getObjParoquia() {
-    const html = this.html.substring(this.html.indexOf('"lista-link">') + 13);
+    var html = this.html.substring(this.html.indexOf('"recuperaDetalhes('));
+    html = html.substring(html.indexOf('"lista-link">') + 13);
     return html.substring(0, html.indexOf("</a>")).trim();
 }
 
