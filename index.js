@@ -1,5 +1,5 @@
 const fs = require('firebase-admin');
-const serviceAccount = require('../../key.json');
+const serviceAccount = require('./keys/key.json');
 
 fs.initializeApp({
     credential: fs.credential.cert(serviceAccount)
@@ -8,7 +8,7 @@ fs.initializeApp({
 const db = fs.firestore();
 
 var request = require('request');
-var pagina = 1;
+var pagina = 4;
 var existePagina = true;
 var paroquias = []
 var p = {}
@@ -16,7 +16,6 @@ var collectionName = 'paroquias'
 var html = '';
 var htmlDetalhes = '';
 //getData();
-
 main();
 
 async function getData() {
@@ -25,7 +24,7 @@ async function getData() {
         const querySnapshot = await query.get();
         const documents = querySnapshot.docs.map((doc) => doc.data()); // Extract document data
         // console.log('Documents in category:', category);
-        console.log(documents);
+        //console.log(documents);
     } catch (error) {
         console.error('Error retrieving documents:', error);
     }
@@ -72,7 +71,7 @@ async function addParoquia(data, collectionName) {
         const docRef = collectionRef.doc(); // Generate a unique document ID
 
         await docRef.set(data); // Set the data on the newly created document
-        console.log('Data added to collection:', collectionName);
+        //console.log('Data added to collection:', collectionName);
     } catch (error) {
         console.error('Error adding data:', error);
     }
@@ -81,7 +80,7 @@ async function addParoquia(data, collectionName) {
 
 async function main() {
     console.log('excluindo')
-    await limparParoquias()
+ //   await limparParoquias()
     console.log('banco limpo')
     await getPagina(pagina).then(function (data) { this.html = data; });
     while (existePagina) {
@@ -90,16 +89,16 @@ async function main() {
             var currentId = getCurrentId();
             var currentName = getObjParoquia();
             limparHtml();
-            console.log(currentName);
+            console.log(currentName, currentId);
             await getPaginaDetalhes(currentId).then(function (data) { this.htmlDetalhes = data; });
-            if (currentId == 2 | true) {
-                await getBaseParoquia();
-                await getCapelas();
-                await getPadres();
-            }
+            // if (currentId == 2 | true) {
+            await getBaseParoquia();
+            await getCapelas();
+            await getPadres();
+            // }
             p.currentId = currentId;
             p.currentName = currentName;
-            console.log('testando paroco ', p.padres[0], p.padres[0] != undefined)
+            //console.log('testando paroco ', p.padres[0], p.padres[0] != undefined)
             p.paroco = p.padres[0] != undefined ? p.padres[0] : '';
             p.vigario = p.padres[1] != undefined ? p.padres[1] : '';
 
@@ -108,9 +107,13 @@ async function main() {
 
             //p.telefones = 
             paroquias.push(p);
+            if (currentId == 142) {
+                console.log('pausa aqui');
+                console.log(p)
+            }
             existeItem = this.html.indexOf('"recuperaDetalhes(') != -1
             // console.log(p)
-            await addParoquia(p, collectionName)
+            //      await addParoquia(p, collectionName)
             p = {}
         }
 
@@ -118,7 +121,7 @@ async function main() {
         console.log(pagina)
         await getPagina(pagina).then(function (data) { this.html = data; });
         existePagina = this.html.indexOf('Clique para exibir/ocultar os detalhes da paróquia') != -1;
-        existePagina = false;
+        // existePagina = false;
     }
     // console.log('QUANTIDADE DE PAROQUIAS ', paroquias.length)
 }
@@ -231,7 +234,7 @@ function getPadres() {
             p.padres.push(element.replace('</li>', ''))
         }
     })
-    console.log('PADRES NMONTADOS ', p.padres)
+    //console.log('PADRES NMONTADOS ', p.padres)
     return html.substring(0, html.indexOf("</a>")).trim();
 }
 
