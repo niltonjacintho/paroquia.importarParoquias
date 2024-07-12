@@ -23,8 +23,6 @@ async function getData() {
         const query = db.collection(collectionName); // Replace with your collection name
         const querySnapshot = await query.get();
         const documents = querySnapshot.docs.map((doc) => doc.data()); // Extract document data
-        // console.log('Documents in category:', category);
-        //console.log(documents);
     } catch (error) {
         console.error('Error retrieving documents:', error);
     }
@@ -71,7 +69,6 @@ async function addParoquia(data, collectionName) {
         const docRef = collectionRef.doc(); // Generate a unique document ID
 
         await docRef.set(data); // Set the data on the newly created document
-        //console.log('Data added to collection:', collectionName);
     } catch (error) {
         console.error('Error adding data:', error);
     }
@@ -91,30 +88,24 @@ async function main() {
             limparHtml();
             console.log(currentName, currentId);
             await getPaginaDetalhes(currentId).then(function (data) { this.htmlDetalhes = data; });
-            // if (currentId == 2 | true) {
             await getBaseParoquia();
             await getCapelas();
             await getPadres();
-            // }
             p.currentId = currentId;
             p.currentName = currentName;
-            //console.log('testando paroco ', p.padres[0], p.padres[0] != undefined)
             p.paroco = p.padres[0] != undefined ? p.padres[0] : '';
             p.vigario = p.padres[1] != undefined ? p.padres[1] : '';
 
-            p.latitude = p.capelas[0].latitude != undefined ? p.capelas[0].latitude.replace("'", "").replace("'", "") : '';
-            p.longitude = p.capelas[0].longitude != undefined ? p.capelas[0].longitude.replace("'", "").replace("'", "") : '';
+            p.latitude = p.capelas[0].latitude != undefined ? p.capelas[0].latitude.replace("'", "").replace("'", "") : null;
+            p.longitude = p.capelas[0].longitude != undefined ? p.capelas[0].longitude.replace("'", "").replace("'", "") : null;
 
-            //p.telefones = 
+            p.latitude = p.latitude == '' ? null : p.latitude;
+            p.longitude = p.longitude == '' ? null : p.longitude;
+
             paroquias.push(p);
-            if (currentId == 141) {
-                console.log('pausa aqui');
-                console.log(p)
-            }
+
             existeItem = this.html.indexOf('"recuperaDetalhes(') != -1
-            // console.log(p)
-            if (currentId == 141)
-                await addParoquia(p, collectionName)
+            await addParoquia(p, collectionName)
             p = {}
         }
 
@@ -134,9 +125,6 @@ function limparHtml() {
 function getCurrentId() {
     const html = this.html.substring(this.html.indexOf('"recuperaDetalhes('));
     const id = parseInt(html.substring(0, html.indexOf("')") + 1).split(',')[1].replace("'", ""));
-    if (id == 141) {
-        console.log('=====>', id, html, this.html)
-    }
     return id;
 }
 
@@ -231,16 +219,11 @@ function getCapelas() {
 function getPadres() {
     p.padres = [];
     const html = this.htmlDetalhes.substring(this.htmlDetalhes.indexOf('<ul>') + 4, this.htmlDetalhes.indexOf('</ul>') - 4);
-    // console.log(html)
-    // console.log(html.split('<li>')[0])
-
     html.split('<li>').forEach(element => {
-        // console.log('padre => ', element)
         if (element.trim().length > 2) {
             p.padres.push(element.replace('</li>', ''))
         }
     })
-    //console.log('PADRES NMONTADOS ', p.padres)
     return html.substring(0, html.indexOf("</a>")).trim();
 }
 
